@@ -1,22 +1,9 @@
-# AIFENCE website
+# AIFENCE GitHub Pages site
 
-Static, responsive multi-page site for **https://aifence.github.io**.
+Static GitHub Pages implementation of the approved light, documentation-first AIFENCE concept.
 
 ## Deploy
 
-1. Copy the contents of this folder into the root of `AIFENCE/AIFENCE.github.io`.
-2. In GitHub **Settings → Pages**, select **GitHub Actions** as the source.
-3. Push to `main`. The included workflow publishes the repository root.
+Place these files at the root of `AIFENCE/AIFENCE.github.io`, commit to `main`, and set **Settings → Pages → Source** to **GitHub Actions**.
 
-No build step is required. The site uses semantic HTML, modern responsive CSS, a tiny local JavaScript file, Google Fonts, and Font Awesome via CDN.
-
-## Structure
-
-- `index.html` — product landing page
-- separate documentation pages for getting started, architecture, tiers, API, security, and deployment
-- `assets/` — logo, social image, CSS, and JavaScript
-- `.github/workflows/pages.yml` — GitHub Pages deployment
-
-## Branding
-
-`assets/aifence-logo.png` and `assets/aifence-mark.png` are derived from the supplied AIFENCE logo and retain transparent backgrounds.
+The included workflow deploys the repository root as the site.
