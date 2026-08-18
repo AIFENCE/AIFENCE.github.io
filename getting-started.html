@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Getting started | AIFENCE</title><meta name="description" content="Install and run AIFENCE.">
+<meta name="theme-color" content="#07142e"><meta property="og:title" content="Getting started | AIFENCE"><meta property="og:description" content="Install and run AIFENCE."><meta property="og:type" content="website"><meta property="og:image" content="assets/og.png">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="assets/styles.css">
+</head><body class="docs">
+<a class="skip" href="#content">Skip to content</a>
+<header class="topbar"><div class="navwrap">
+<a class="brand" href="index.html"><img src="assets/aifence-mark.png" alt=""><span>AI<span>FENCE</span></span></a>
+<nav class="desktop-nav" aria-label="Primary"><a href="index.html" class="">Overview</a><a href="getting-started.html" class="active">Get started</a><a href="architecture.html" class="">Architecture</a><a href="quality.html" class="">Quality</a><a href="guard.html" class="">Guard</a><a href="bus.html" class="">Bus</a><a href="api.html" class="">API</a><a href="security.html" class="">Security</a><a href="deployment.html" class="">Deploy</a></nav>
+<div class="nav-actions"><button id="themeBtn" class="icon-btn" aria-label="Toggle theme"><i class="fa-solid fa-sun"></i></button><a class="github-btn" href="https://github.com/AIFENCE/AIFENCE" target="_blank" rel="noopener"><i class="fa-brands fa-github"></i><span>GitHub</span></a><button id="menuBtn" class="menu-btn" aria-label="Open menu" aria-expanded="false"><i class="fa-solid fa-bars"></i></button></div>
+</div><nav id="mobileNav" class="mobile-nav" aria-label="Mobile"><a href="index.html" class="">Overview</a><a href="getting-started.html" class="active">Get started</a><a href="architecture.html" class="">Architecture</a><a href="quality.html" class="">Quality</a><a href="guard.html" class="">Guard</a><a href="bus.html" class="">Bus</a><a href="api.html" class="">API</a><a href="security.html" class="">Security</a><a href="deployment.html" class="">Deploy</a></nav></header>
+<main id="content"><div class="doc-layout"><article class="doc-content"><section class="doc-hero"><span class="kicker">Documentation</span><h1>Getting started</h1><p>Install AIFENCE, bootstrap identity, and run an artifact through the full fence.</p></section><h2>Install</h2><p>AIFENCE targets Python 3.12+. Create an isolated environment and install the repository in editable mode.</p><div class="codeblock"><div class="codebar"><span>bash</span><button class="copy" type="button" aria-label="Copy code"><i class="fa-regular fa-copy"></i> Copy</button></div><pre><code>python -m venv .venv
+. .venv/bin/activate          # Windows: .venv\Scripts\Activate.ps1
+pip install -e &quot;.[dev]&quot;</code></pre></div><div class="callout"><i class="fa-solid fa-circle-info"></i><div><strong>Optional extras</strong><p>postgres, s3, mcp, otel, quality, redis, kafka, rabbitmq, and bench.</p></div></div><h2>Run the composed application</h2><div class="codeblock"><div class="codebar"><span>bash</span><button class="copy" type="button" aria-label="Copy code"><i class="fa-regular fa-copy"></i> Copy</button></div><pre><code>aifence-api
+curl http://127.0.0.1:8080/health/ready</code></pre></div><div class="codeblock"><div class="codebar"><span>json</span><button class="copy" type="button" aria-label="Copy code"><i class="fa-regular fa-copy"></i> Copy</button></div><pre><code>{ &quot;ready&quot;: true,
+  &quot;subsystems&quot;: [&quot;aifence.quality&quot;, &quot;aifence.guard&quot;, &quot;aifence.bus&quot;],
+  &quot;region_role&quot;: &quot;active&quot;,
+  &quot;accepts_writes&quot;: true }</code></pre></div><h2>Submit through the fence</h2><div class="codeblock"><div class="codebar"><span>bash</span><button class="copy" type="button" aria-label="Copy code"><i class="fa-regular fa-copy"></i> Copy</button></div><pre><code>curl -X POST http://127.0.0.1:8080/v1/fence/submit \
+  -H &quot;Authorization: Bearer $AIFENCE_API_KEY&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#x27;{
+    &quot;artifact&quot;: &quot;# Q3 Report\n\nRevenue grew 12% to $4.2M.&quot;,
+    &quot;content_type&quot;: &quot;text/markdown&quot;,
+    &quot;receiver&quot;: &quot;analytics-agent&quot;,
+    &quot;action&quot;: { &quot;operation&quot;: &quot;read&quot; }
+  }&#x27;</code></pre></div><h2>What happens next</h2><ul><li>A placeholder-laden artifact stops at <code>blocked_by_quality</code>.</li><li>A destructive high-risk action can pass quality and stop at <code>blocked_by_guard</code>.</li><li>A full pass returns <code>final_outcome: "handed_off"</code> with a durable message ID.</li></ul></article></div></main>
+<footer><div><a class="brand footer-brand" href="index.html"><img src="assets/aifence-mark.png" alt=""><span>AI<span>FENCE</span></span></a><p>One governed fence around AI agents.</p></div><div class="footer-links"><a href="getting-started.html">Docs</a><a href="api.html">API</a><a href="security.html">Security</a><a href="https://github.com/AIFENCE/AIFENCE" target="_blank" rel="noopener">Source</a></div><p class="legal">AGPL-3.0-or-later or commercial license.</p></footer>
+<script src="assets/app.js" defer></script></body></html>

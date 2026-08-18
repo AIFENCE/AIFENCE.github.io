@@ -1,61 +1,22 @@
-# AIFENCE documentation
+# AIFENCE website
 
-Source for the documentation wiki published at **<https://aifence.github.io>**.
+Static, responsive multi-page site for **https://aifence.github.io**.
 
-This repository holds the documentation only. The system it documents lives in
-[AIFENCE/AIFENCE](https://github.com/AIFENCE/AIFENCE).
+## Deploy
 
-## Editing
+1. Copy the contents of this folder into the root of `AIFENCE/AIFENCE.github.io`.
+2. In GitHub **Settings → Pages**, select **GitHub Actions** as the source.
+3. Push to `main`. The included workflow publishes the repository root.
 
-Every page is a Markdown file in `docs/`. Edit the Markdown — the HTML under
-`site/` is generated on each publish and is never committed.
+No build step is required. The site uses semantic HTML, modern responsive CSS, a tiny local JavaScript file, Google Fonts, and Font Awesome via CDN.
 
-```bash
-npm run serve      # build and preview at http://127.0.0.1:4173
-npm run check      # build and verify every internal link
-```
+## Structure
 
-Pushing to `main` builds the site and publishes it. A broken internal link
-fails the build rather than shipping a 404.
+- `index.html` — product landing page
+- separate documentation pages for getting started, architecture, tiers, API, security, and deployment
+- `assets/` — logo, social image, CSS, and JavaScript
+- `.github/workflows/pages.yml` — GitHub Pages deployment
 
-## Page format
+## Branding
 
-Each page opens with front matter that drives the title, the search summary and
-the sidebar infobox:
-
-```markdown
----
-title: Security model
-summary: Authentication, content classification, evidence, and the fail-closed posture.
-infobox:
-  Identity: scoped API keys + SPIFFE
-  Posture: fail closed
----
-```
-
-`docs/index.md` is the front page. Links between pages are written as plain
-relative Markdown links (`[guard tier](guard.md)`) and are rewritten to `.html`
-at build time.
-
-## The build
-
-`tooling/build-wiki.mjs` has no dependencies — it is plain Node reading `docs/`
-and writing `site/`. `tooling/wiki.css` is the whole stylesheet.
-`tooling/check-wiki-links.mjs` verifies that every internal link and anchor
-resolves.
-
-## The API reference
-
-`docs/api.md` is generated from the application's OpenAPI document rather than
-written by hand. Regenerate it from a checkout of the code repository, with this
-repository checked out alongside it:
-
-```bash
-python tooling/generate-api-docs.py
-```
-
-## License
-
-The documentation is part of AIFENCE and carries the same terms: AGPL-3.0-or-later
-or a separate commercial license. See
-[LICENSING.md](https://github.com/AIFENCE/AIFENCE/blob/main/LICENSING.md).
+`assets/aifence-logo.png` and `assets/aifence-mark.png` are derived from the supplied AIFENCE logo and retain transparent backgrounds.

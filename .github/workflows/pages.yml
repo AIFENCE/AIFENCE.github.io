@@ -1,49 +1,27 @@
-name: Publish
-
-# Builds docs/*.md into a static site and publishes it to https://aifence.github.io.
-#
-# Requires Settings -> Pages -> Source set to "GitHub Actions". The generated
-# site is never committed; this workflow is the only thing that produces it.
-
+name: Publish website
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
-# A newer commit supersedes a queued one; never publish two builds at once.
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 permissions:
   contents: read
   pages: write
   id-token: write
-
+concurrency:
+  group: pages
+  cancel-in-progress: true
 jobs:
-  publish:
-    name: Build and publish
-    runs-on: ubuntu-latest
+  deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Build the site
-        run: node tooling/build-wiki.mjs
-
-      - name: Check for broken internal links
-        # A 404 in published documentation is worse than a failed build, so a
-        # broken link stops the publish rather than shipping.
-        run: node tooling/check-wiki-links.mjs
-
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
-      - id: deploy
+          path: .
+      - name: Deploy to GitHub Pages
+        id: deployment
         uses: actions/deploy-pages@v4
