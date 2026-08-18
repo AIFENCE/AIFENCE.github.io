@@ -1,0 +1,12 @@
+AIFENCE
+Copyright (c) NeuralBinary and contributors.
+
+AIFENCE is one governed control plane composed of three tiers:
+
+  - aifence.bus      — semantic communication runtime
+  - aifence.guard    — security control & enforcement plane
+  - aifence.quality  — production quality-control gate
+
+Credits: @NeuralBinary, @ro0ti.
+
+Licensed under AGPL-3.0-or-later OR a commercial license. See LICENSING.md.

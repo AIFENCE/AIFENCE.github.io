@@ -1,0 +1,6 @@
+# Generated output. The site is built from docs/ on every deploy, so it is
+# never committed here.
+/site/
+
+node_modules/
+.DS_Store
