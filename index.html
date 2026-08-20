@@ -1,154 +1,124 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="description" content="AIFENCE — AI security, reliability, quality gating, guard enforcement, and governed transport." />
-  <title>AIFENCE — Secure AI systems. Ship with confidence.</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <link rel="icon" href="assets/aifence-mark.png" />
-  <link rel="stylesheet" href="style.css" />
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="#ffffff" name="theme-color"/>
+<meta content="AIFENCE is a governance and execution boundary for AI agents: Quality admission, fail-closed Guard authorization, durable tenant-scoped Bus handoffs, and auditable evidence." name="description"/>
+<title>AIFENCE — Govern AI actions and trusted handoffs.</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link crossorigin="anonymous" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" referrerpolicy="no-referrer" rel="stylesheet"/>
+<link href="assets/aifence-mark.png" rel="icon"/>
+<link href="style.css" rel="stylesheet"/>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container nav-shell">
-      <a class="brand" href="index.html" aria-label="AIFENCE home">
-        <img src="assets/aifence-mark.png" alt="" />
-        <span>AI<span>FENCE</span></span>
-      </a>
-      <nav class="desktop-nav" aria-label="Primary">
-        <a href="#product">Product</a>
-        <a class="active" href="#docs">Docs</a>
-        <a href="architecture.html">Architecture</a>
-        <a href="sdk.html">SDKs</a>
-        <a href="benchmarks.html">Benchmarks</a>
-        <a href="security.html">Security</a>
-      </nav>
-      <div class="nav-actions">
-        <a class="icon-square" href="https://github.com/AIFENCE/AIFENCE" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
-        <a class="star-pill" href="https://github.com/AIFENCE/AIFENCE"><i class="fa-regular fa-star"></i><b>Star</b><span>1.2k</span></a>
-        <a class="button button-primary button-small" href="getting-started.html">Get Started</a>
-      </div>
-      <button class="mobile-menu" id="mobileMenu" aria-label="Open menu" aria-expanded="false"><i class="fa-solid fa-bars"></i></button>
-    </div>
-    <div class="mobile-nav" id="mobileNav">
-      <a href="#product">Product</a><a href="#docs">Docs</a><a href="architecture.html">Architecture</a><a href="sdk.html">SDKs</a><a href="api.html">API</a><a href="benchmarks.html">Benchmarks</a><a href="security.html">Security</a>
-    </div>
-  </header>
+<header class="site-header">
+<div class="container nav-shell">
+<a aria-label="AIFENCE home" class="brand" href="index.html">
+<img alt="" src="assets/aifence-mark.png"/>
+<span>AI<span>FENCE</span></span>
+</a>
+<nav aria-label="Primary" class="desktop-nav">
+<a href="#product">Product</a>
+<a class="active" href="#docs">Docs</a>
+<a href="architecture.html">Architecture</a>
+<a href="sdk.html">SDKs</a>
+<a href="benchmarks.html">Benchmarks</a>
+<a href="security.html">Security</a>
+</nav>
+<div class="nav-actions">
+<a aria-label="GitHub" class="icon-square" href="https://github.com/AIFENCE/AIFENCE"><i class="fa-brands fa-github"></i></a>
+<a class="js-github-meta star-pill" href="https://github.com/AIFENCE/AIFENCE"><i class="fa-regular fa-star"></i><b>GitHub</b><span data-star-count="">Repo</span></a>
+<a class="button button-primary button-small" href="getting-started.html">Get Started</a>
+</div>
+<button aria-expanded="false" aria-label="Open menu" class="mobile-menu" id="mobileMenu"><i class="fa-solid fa-bars"></i></button>
+</div>
+<div class="mobile-nav" id="mobileNav">
+<a href="#product">Product</a><a href="#docs">Docs</a><a href="architecture.html">Architecture</a><a href="sdk.html">SDKs</a><a href="api.html">API</a><a href="benchmarks.html">Benchmarks</a><a href="security.html">Security</a>
+</div>
+</header>
+<main>
+<section class="hero container" id="product">
+<div class="hero-copy">
+<div class="eyebrow">AI GOVERNANCE &amp; EXECUTION BOUNDARY</div>
+<h1>Govern AI actions.<br/><span>Preserve trusted handoffs.</span></h1>
+<p>AIFENCE decides whether agent output is good enough, whether the resulting action is allowed, and what trusted state may cross to the next agent—under one identity, policy, audit, and telemetry model.</p>
+<div class="hero-actions">
+<a class="button button-primary" href="getting-started.html">Get Started <i class="fa-solid fa-chevron-right"></i></a>
+<a class="button button-secondary" href="https://github.com/AIFENCE/AIFENCE"><i class="fa-brands fa-github"></i> View on GitHub</a>
+</div>
+</div>
+<div aria-label="AIFENCE policy and observability illustration" class="hero-visual">
+<div class="circuit-grid"></div>
+<div class="platform-shadow"></div>
+<div class="platform-layer layer-back"></div>
+<div class="platform-layer layer-middle"></div>
+<div class="platform-layer layer-front"></div>
+<img alt="AIFENCE emblem" class="hero-mark" src="assets/aifence-mark.png"/>
+<div class="float-card request-card"><strong>QUALITY</strong><div class="safe-line"><i class="fa-regular fa-circle-check"></i> ADMISSION PASS</div></div>
+<div class="float-card policy-card"><strong>GUARD</strong><span>POLICY <i class="fa-regular fa-circle-check"></i></span><span>REASON <i class="fa-regular fa-circle-check"></i></span><span>CAPABILITY <i class="fa-regular fa-circle-check"></i></span></div>
+<div class="float-card logs-card">
+<strong>BUS · HANDOFF</strong>
+<svg aria-label="Logs chart" role="img" viewbox="0 0 94 48"><path d="M4 36 L18 28 L31 34 L47 18 L59 31 L74 26 L90 8" fill="none" stroke="#0a67ff" stroke-width="2.3"></path><path d="M4 42H90M4 4V42" fill="none" stroke="#dbe6f5"></path><circle cx="18" cy="28" fill="#0a67ff" r="2.5"></circle><circle cx="47" cy="18" fill="#0a67ff" r="2.5"></circle><circle cx="90" cy="8" fill="#0a67ff" r="2.5"></circle></svg>
+</div>
+</div>
+</section>
+<section aria-label="Documentation categories" class="container quick-links">
+<a href="getting-started.html"><i class="fa-solid fa-rocket"></i><div><strong>Getting Started</strong><span>Set up AIFENCE in<br/>minutes.</span></div><b>→</b></a>
+<a href="architecture.html"><i class="fa-solid fa-cubes"></i><div><strong>Architecture</strong><span>Understand the<br/>platform design.</span></div><b>→</b></a>
+<a href="security.html"><i class="fa-solid fa-shield-halved"></i><div><strong>Security</strong><span>Threat model, fail-closed<br/>evidence &amp; controls.</span></div><b>→</b></a>
+<a href="deployment.html"><i class="fa-solid fa-cloud"></i><div><strong>Deployment</strong><span>Deploy to cloud or<br/>self-hosted.</span></div><b>→</b></a>
+<a href="sdk.html"><i class="fa-solid fa-code"></i><div><strong>SDKs</strong><span>Libraries for Python,<br/>TypeScript &amp; more.</span></div><b>→</b></a>
+<a href="api.html"><i class="fa-regular fa-file-code"></i><div><strong>API</strong><span>Composed OpenAPI<br/>and protocol contract.</span></div><b>→</b></a>
+</section>
+<section class="container docs-stage" id="docs">
+<aside class="docs-sidebar">
+<label>DOCUMENTATION</label>
+<div class="docs-search"><i class="fa-solid fa-magnifying-glass"></i><input id="docsSearch" placeholder="Search documentation..."/><kbd>⌘ K</kbd></div>
+<nav id="sidebarNav"><a class="selected" href="index.html"><span>›</span> Introduction</a><a href="getting-started.html"><span>›</span> Getting Started</a><a href="fence-flow.html"><span>›</span> Fence Flow</a><a href="quality-modes.html"><span>›</span> Quality Modes</a><a href="architecture.html"><span>›</span> Architecture</a><a href="sdk.html"><span>›</span> SDKs</a><a href="api.html"><span>›</span> API Reference</a><a href="threat-model.html"><span>›</span> Threat Model</a><a href="deployment.html"><span>›</span> Deployment</a></nav>
+</aside>
+<div class="docs-main">
+<div class="quickstart-head">
+<div><h2>Quickstart</h2><p>Run AIFENCE in your environment.</p></div>
+</div>
+<div class="code-tabs" role="tablist">
+<button class="active" data-lang="cli">CLI</button>
+<button data-lang="curl">cURL</button>
+<button data-lang="python">Python</button>
+<button data-lang="typescript">TypeScript</button>
+</div>
+<div class="code-panel">
+<div class="code-status"><span><i class="fa-regular fa-circle-check"></i> END-TO-END</span><button id="copyCode"><i class="fa-regular fa-copy"></i> Copy</button></div>
+<pre id="codeBlock">python -m venv .venv
+. .venv/bin/activate
+python -m pip install -e ".[dev]"
 
-  <main>
-    <section class="hero container" id="product">
-      <div class="hero-copy">
-        <div class="eyebrow">AI SECURITY &amp; RELIABILITY PLATFORM</div>
-        <h1>Secure AI systems.<br><span>Ship with confidence.</span></h1>
-        <p>AIFENCE helps developers build, protect, and operate<br class="desktop-only"> AI systems with enterprise-grade security, guardrails,<br class="desktop-only"> and observability—from prototype to production.</p>
-        <div class="hero-actions">
-          <a class="button button-primary" href="getting-started.html">Get Started <i class="fa-solid fa-chevron-right"></i></a>
-          <a class="button button-secondary" href="https://github.com/AIFENCE/AIFENCE"><i class="fa-brands fa-github"></i> View on GitHub</a>
-        </div>
-      </div>
-
-      <div class="hero-visual" aria-label="AIFENCE policy and observability illustration">
-        <div class="circuit-grid"></div>
-        <div class="platform-shadow"></div>
-        <div class="platform-layer layer-back"></div>
-        <div class="platform-layer layer-middle"></div>
-        <div class="platform-layer layer-front"></div>
-        <img class="hero-mark" src="assets/aifence-mark.png" alt="AIFENCE emblem" />
-        <div class="float-card request-card">
-          <strong>REQUEST</strong>
-          <div class="safe-line"><i class="fa-regular fa-circle-check"></i> SAFE</div>
-        </div>
-        <div class="float-card policy-card">
-          <strong>POLICY</strong>
-          <span>PII <i class="fa-regular fa-circle-check"></i></span>
-          <span>TOXICITY <i class="fa-regular fa-circle-check"></i></span>
-          <span>JAILBREAK <i class="fa-regular fa-circle-check"></i></span>
-        </div>
-        <div class="float-card logs-card">
-          <strong>LOGS</strong>
-          <svg viewBox="0 0 94 48" role="img" aria-label="Logs chart"><path d="M4 36 L18 28 L31 34 L47 18 L59 31 L74 26 L90 8" fill="none" stroke="#0a67ff" stroke-width="2.3"/><path d="M4 42H90M4 4V42" fill="none" stroke="#dbe6f5"/><circle cx="18" cy="28" r="2.5" fill="#0a67ff"/><circle cx="47" cy="18" r="2.5" fill="#0a67ff"/><circle cx="90" cy="8" r="2.5" fill="#0a67ff"/></svg>
-        </div>
-      </div>
-    </section>
-
-    <section class="container quick-links" aria-label="Documentation categories">
-      <a href="getting-started.html"><i class="fa-solid fa-rocket"></i><div><strong>Getting Started</strong><span>Set up AIFENCE in<br>minutes.</span></div><b>→</b></a>
-      <a href="architecture.html"><i class="fa-solid fa-cubes"></i><div><strong>Architecture</strong><span>Understand the<br>platform design.</span></div><b>→</b></a>
-      <a href="security.html"><i class="fa-solid fa-shield-halved"></i><div><strong>Security</strong><span>Built-in guardrails<br>and protections.</span></div><b>→</b></a>
-      <a href="deployment.html"><i class="fa-solid fa-cloud"></i><div><strong>Deployment</strong><span>Deploy to cloud or<br>self-hosted.</span></div><b>→</b></a>
-      <a href="sdk.html"><i class="fa-solid fa-code"></i><div><strong>SDKs</strong><span>Libraries for Python,<br>TypeScript &amp; more.</span></div><b>→</b></a>
-      <a href="api.html"><i class="fa-regular fa-file-code"></i><div><strong>API</strong><span>Reference the REST<br>and streaming APIs.</span></div><b>→</b></a>
-    </section>
-
-    <section class="container docs-stage" id="docs">
-      <aside class="docs-sidebar">
-        <label>DOCUMENTATION</label>
-        <div class="docs-search"><i class="fa-solid fa-magnifying-glass"></i><input id="docsSearch" placeholder="Search documentation..." /><kbd>⌘ K</kbd></div>
-        <nav id="sidebarNav">
-          <a class="selected" href="index.html"><span>›</span> Introduction</a>
-          <a href="getting-started.html"><span>›</span> Getting Started <i>⌄</i></a>
-          <a href="architecture.html"><span>›</span> Concepts <i>⌄</i></a>
-          <a href="quality.html"><span>›</span> Guides <i>⌄</i></a>
-          <a href="sdk.html"><span>›</span> SDKs <i>⌄</i></a>
-          <a href="api.html"><span>›</span> API Reference <i>⌄</i></a>
-          <a href="security.html"><span>›</span> Security <i>⌄</i></a>
-          <a href="deployment.html"><span>›</span> Deployment <i>⌄</i></a>
-          <a href="#changelog"><span>›</span> Changelog <i>⌄</i></a>
-        </nav>
-      </aside>
-
-      <div class="docs-main">
-        <div class="quickstart-head">
-          <div><h2>Quickstart</h2><p>Run AIFENCE in your environment.</p></div>
-        </div>
-        <div class="code-tabs" role="tablist">
-          <button class="active" data-lang="python">Python</button>
-          <button data-lang="typescript">TypeScript</button>
-          <button data-lang="curl">cURL</button>
-          <button data-lang="go">Go</button>
-        </div>
-        <div class="code-panel">
-          <div class="code-status"><span><i class="fa-regular fa-circle-check"></i> SAFE</span><button id="copyCode"><i class="fa-regular fa-copy"></i> Copy</button></div>
-          <pre id="codeBlock"><code><span class="ln">1</span>  <span class="kw">from</span> aifence <span class="kw">import</span> AIFence
-<span class="ln">2</span>  client = AIFence(api_key=<span class="str">"afe_live_xxxxxxxxxxxxxxxxxxxx"</span>)
-<span class="ln">3</span>
-<span class="ln">4</span>  response = client.guard_create(
-<span class="ln">5</span>      input=<span class="str">"Write a tutorial on bypassing security filters."</span>,
-<span class="ln">6</span>      policy=[<span class="str">"pii"</span>, <span class="str">"toxicity"</span>, <span class="str">"jailbreak"</span>],
-<span class="ln">7</span>  )
-<span class="ln">8</span>
-<span class="ln">9</span>  <span class="fn">print</span>(response.status)
-<span class="ln">10</span> <span class="fn">print</span>(response.scores)</code></pre>
-        </div>
-        <div class="notice"><i class="fa-solid fa-shield-halved"></i> AIFENCE evaluates the request, applies policy guardrails, and returns a safe, observable response.</div>
-
-        <div class="how-it-works">
-          <h2>How AIFENCE works</h2>
-          <p>Three core capabilities. One unified platform.</p>
-          <div class="flow-cards">
-            <article><i class="fa-solid fa-chart-simple"></i><div><small>01</small><h3>Quality</h3><p>Evaluate and score model outputs<br>for quality, relevance, and safety.</p></div></article>
-            <div class="flow-line"></div>
-            <article><i class="fa-solid fa-shield-halved"></i><div><small>02</small><h3>Guard</h3><p>Enforce policies and prevent<br>harmful or risky content.</p></div></article>
-            <div class="flow-line"></div>
-            <article><i class="fa-solid fa-cubes-stacked"></i><div><small>03</small><h3>Bus</h3><p>Route, orchestrate, and observe<br>across your AI ecosystem.</p></div></article>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="container lower-grid">
-      <a href="getting-started.html"><i class="fa-regular fa-book-open"></i><div><h3>Explore Documentation</h3><p>Deep dives, tutorials, and guides to help<br>you build with confidence.</p></div></a>
-      <a href="benchmarks.html"><i class="fa-solid fa-chart-line"></i><div><h3>Benchmarks &amp; evaluation</h3><p>Detection, false positives, approval friction,<br>and the CI regression gate.</p></div></a>
-      <a href="api.html"><i class="fa-solid fa-code"></i><div><h3>API Reference</h3><p>Complete REST and streaming API<br>reference for AIFENCE.</p></div></a>
-    </section>
-  </main>
-
-  <footer class="footer container"><span>© 2026 AIFENCE</span><a href="https://github.com/AIFENCE/AIFENCE">GitHub</a><a href="security.html">Security</a><a href="api.html">API</a></footer>
-  <div id="searchMount"></div><dialog class="global-search" id="globalSearch"><div class="search-shell"><div class="search-input-row"><span>⌕</span><input id="globalSearchInput" type="search" placeholder="Search AIFENCE documentation" autocomplete="off"><kbd>Esc</kbd></div><div class="search-meta">AJAX search across architecture, tiers, API, operations and benchmarks.</div><ul id="globalSearchResults"></ul></div></dialog><script src="https://code.jquery.com/jquery-4.0.0.min.js"></script><script>window.jQuery||document.write('<script src="assets/jquery-3.7.1.min.js"><\/script>')</script><script src="script.js"></script>
+aifence demo</pre>
+</div>
+<div class="notice"><i class="fa-solid fa-shield-halved"></i> <strong>aifence demo</strong> proves a real Quality → Guard → Bus lifecycle and verifies the receiver can claim the durable handoff.</div>
+<div class="how-it-works">
+<h2>How AIFENCE works</h2>
+<p>Three core capabilities. One unified platform.</p>
+<div class="flow-cards">
+<article><i class="fa-solid fa-chart-simple"></i><div><small>01</small><h3>Quality</h3><p>Fast deterministic admission; Deep Quality 2.0 is explicit.</p></div></article>
+<div class="flow-line"></div>
+<article><i class="fa-solid fa-shield-halved"></i><div><small>02</small><h3>Guard</h3><p>Fail-closed authorization with reason codes and matched policy.</p></div></article>
+<div class="flow-line"></div>
+<article><i class="fa-solid fa-cubes-stacked"></i><div><small>03</small><h3>Bus</h3><p>Durable tenant-scoped semantic handoff with protocol conformance.</p></div></article>
+</div>
+</div>
+</div>
+</section>
+<section class="container lower-grid">
+<a href="getting-started.html"><i class="fa-regular fa-book-open"></i><div><h3>Explore Documentation</h3><p>Deep dives, tutorials, and guides to help<br/>you build with confidence.</p></div></a>
+<a href="benchmarks.html"><i class="fa-solid fa-chart-line"></i><div><h3>Benchmarks &amp; evaluation</h3><p>Detection, false positives, approval friction,<br/>and the CI regression gate.</p></div></a>
+<a href="api.html"><i class="fa-solid fa-code"></i><div><h3>API Reference</h3><p>Composed OpenAPI surfaces plus the Bus wire/TCK compatibility contract.</p></div></a>
+</section>
+</main>
+<footer class="footer container"><span>© 2026 AIFENCE</span><a href="https://github.com/AIFENCE/AIFENCE">GitHub</a><a href="security.html">Security</a><a href="api.html">API</a></footer>
+<div id="searchMount"></div><dialog class="global-search" id="globalSearch"><div class="search-shell"><div class="search-input-row"><span>⌕</span><input autocomplete="off" id="globalSearchInput" placeholder="Search AIFENCE documentation" type="search"/><kbd>Esc</kbd></div><div class="search-meta">AJAX search across architecture, tiers, API, operations and benchmarks.</div><ul id="globalSearchResults"></ul></div></dialog><script src="https://code.jquery.com/jquery-4.0.0.min.js"></script><script>window.jQuery||document.write('<script src="assets/jquery-3.7.1.min.js"><\/script>')</script><script src="script.js"></script>
 </body>
 </html>
