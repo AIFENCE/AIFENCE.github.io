@@ -1,27 +1,7 @@
-# AIFENCE GitHub Pages site
+# AIFENCE.github.io
 
-Responsive, documentation-first website for `AIFENCE/AIFENCE.github.io`, synchronized with the current AIFENCE monorepo contracts.
+Static documentation site for AIFENCE.
 
-## Included
+This snapshot is aligned to the AIFENCE `0.1.0` release line and presents the public Quality → Guard → Bus architecture, security/failure semantics, protocol/version model, and measured pre-tag verification evidence. Internal candidate labels are intentionally omitted.
 
-- Product positioning around the governed **Quality → Guard → Bus** execution boundary.
-- Five-minute CLI quickstart (`aifence demo`, `doctor`, `serve`, `bootstrap`).
-- Explicit Admission vs Deep Quality 2.0 documentation.
-- Guard reason-code/explainability and fail-closed semantics.
-- Bus `aifence/0.2` / wire-v2 protocol and TCK documentation.
-- Version matrix, threat model, supply-chain/release integrity and observability docs.
-- Reproducible adversarial benchmark page with the 18-trace regression-suite limitation stated explicitly.
-- Responsive AJAX-enhanced docs navigation/search with full-page fallback.
-- No fabricated GitHub star count; the page uses the GitHub API when available and otherwise displays `Repo`.
-
-## Local preview
-
-```bash
-python -m http.server 4173
-```
-
-Then open `http://127.0.0.1:4173`. AJAX features require an HTTP origin rather than `file://`.
-
-## Publish
-
-Copy the contents into the root of `AIFENCE/AIFENCE.github.io` and publish from the repository's configured GitHub Pages source.
+Before publishing release evidence, verify that the corresponding repository commit/tag is frozen and that any deep-assurance results shown on the site were executed against that exact tree.
