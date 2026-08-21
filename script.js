@@ -5,37 +5,8 @@ const AIFenceSite={
   searchIndex:null, benchData:null,
   init(){this.bindMenu();this.bindCodeTabs();this.bindCopy();this.bindSearch();this.bindAjaxDocs();this.bindBenchmarks();this.loadGitHubMeta();this.bindResize();},
   bindMenu(){const $menu=$('#mobileMenu'),$nav=$('#mobileNav');$menu.on('click',()=>{const open=!$nav.hasClass('open');$nav.toggleClass('open',open);$menu.attr('aria-expanded',String(open));$('body').toggleClass('nav-open',open);});$nav.on('click','a',()=>{$nav.removeClass('open');$menu.attr('aria-expanded','false');$('body').removeClass('nav-open');});},
-  snippets:{cli:`python -m venv .venv
-. .venv/bin/activate
-python -m pip install -e ".[dev]"
-
-aifence demo`,curl:`curl -sS -X POST http://127.0.0.1:8080/v1/fence/submit \
-  -H "Authorization: Bearer $AIFENCE_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"artifact":"# Deployment note\n\nValidated for controlled handoff.","receiver":"release-agent","action":{"operation":"read"},"risk_score":10}'`,python:`from aifence_client import AifenceClient
-
-client = AifenceClient(
-    "https://aifence.example.com/guard",
-    api_key="replace-with-secret-manager-value",
-)
-receipt = client.submit_fence({
-    "artifact": "Validated artifact",
-    "receiver": "release-agent",
-    "action": {"operation": "read"},
-})
-print(receipt["final_outcome"])`,typescript:`import {AifenceClient} from "@aifence/client";
-
-const client = new AifenceClient(
-  "https://aifence.example.com/guard",
-  process.env.AIFENCE_API_KEY!,
-);
-const receipt = await client.submitFence({
-  artifact: "Validated artifact",
-  receiver: "release-agent",
-  action: {operation: "read"},
-});
-console.log(receipt.final_outcome);`},
-  bindCodeTabs(){ $(document).on('click','.code-tabs button',function(){const $b=$(this);$('.code-tabs button').removeClass('active');$b.addClass('active');const lang=$b.data('lang'),$block=$('#codeBlock');if($block.length){$block.text(AIFenceSite.snippets[lang]||AIFenceSite.snippets.cli);}});},
+  snippets:{python:`from aifence import AIFence\nclient = AIFence(api_key="afe_live_xxxxxxxxxxxxxxxxxxxx")\n\nresponse = client.guard_create(\n    input="Write a tutorial on bypassing security filters.",\n    policy=["pii", "toxicity", "jailbreak"],\n)\n\nprint(response.status)\nprint(response.scores)`,typescript:`import { AIFence } from "@aifence/sdk";\nconst client = new AIFence({ apiKey: "afe_live_xxx" });\nconst response = await client.guard.create({\n  input: "Evaluate this model response",\n  policy: ["pii", "toxicity", "jailbreak"]\n});`,curl:`curl -X POST http://127.0.0.1:8080/v1/fence/submit \\\n  -H "Authorization: Bearer $AIFENCE_API_KEY" \\\n  -H "Content-Type: application/json" \\\n  -d '{"artifact":"Hello","action":{"operation":"read"}}'`,go:`client := aifence.New(os.Getenv("AIFENCE_API_KEY"))\nresp, err := client.Fence.Submit(ctx, aifence.Request{\n  Artifact: "Hello",\n})`},
+  bindCodeTabs(){ $(document).on('click','.code-tabs button',function(){const $b=$(this);$('.code-tabs button').removeClass('active');$b.addClass('active');const lang=$b.data('lang'),$block=$('#codeBlock');if($block.length){$block.text(AIFenceSite.snippets[lang]||AIFenceSite.snippets.python);}});},
   bindCopy(){$(document).on('click','#copyCode,.copy-doc-code',function(){const $btn=$(this);let text='';if($btn.is('#copyCode')) text=$('#codeBlock').text(); else text=$btn.closest('.doc-code').find('code').text();navigator.clipboard?.writeText(text).then(()=>{$btn.text('Copied');setTimeout(()=>{$btn.text('Copy');},1200);});});},
   bindSearch(){const self=this;$(document).on('click','.search-open,.deep-sidebar .docs-search',function(e){e.preventDefault();self.openSearch();});$('#docsSearch').on('focus',function(){self.openSearch();this.blur();});$(document).on('keydown',function(e){if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();self.openSearch();} if(e.key==='Escape'&&$('#globalSearch')[0]?.open){$('#globalSearch')[0].close();}});$(document).on('input','#globalSearchInput',function(){self.renderSearch($(this).val());});$('#globalSearch').on('click',function(e){if(e.target===this)this.close();});},
   openSearch(){const dlg=$('#globalSearch')[0];if(!dlg)return;const done=()=>{if(!dlg.open)dlg.showModal();$('#globalSearchInput').val('').trigger('input').focus();};if(this.searchIndex){done();return;}$.getJSON('assets/search-index.json').done(data=>{this.searchIndex=data;done();}).fail(()=>{this.searchIndex=[];done();});},
