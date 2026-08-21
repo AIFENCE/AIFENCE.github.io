@@ -1,223 +1,78 @@
-import * as THREE from 'https://esm.sh/three@0.185.1';
-import { EffectComposer } from 'https://esm.sh/three@0.185.1/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'https://esm.sh/three@0.185.1/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'https://esm.sh/three@0.185.1/examples/jsm/postprocessing/UnrealBloomPass.js';
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 
-const host = document.querySelector('#tourWebgl');
-const shell = document.querySelector('.tour-shell');
-const stage = document.querySelector('#tourStage');
-const chapters = [...document.querySelectorAll('[data-tour-chapter]')];
-const hotspots = [...document.querySelectorAll('[data-hotspot]')];
-const hudProgress = document.querySelector('#hudProgress');
-const hudState = document.querySelector('#hudState');
-const hudStep = document.querySelector('#hudStep');
-const gpuTierEl = document.querySelector('#gpuTier');
-const mapState = document.querySelector('#mapState');
-const mapDots = [...document.querySelectorAll('.map-line i')];
-const depthLabel = document.querySelector('#depthLabel');
-const colorwash = document.querySelector('#tourColorwash');
-const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const experience = window.AIFENCE_EXPERIENCE || {};
+const host=document.getElementById('tourWebgl'), shell=document.getElementById('tour'), stage=document.getElementById('tourStage');
+if(!host||!shell||!stage){}else{
+  try{
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const coarse=matchMedia('(pointer:coarse)').matches;
+    const cores=navigator.hardwareConcurrency||4, mem=navigator.deviceMemory||4;
+    let tier=(coarse||cores<=4||mem<=4)?'LOW':(cores>=10&&mem>=8?'HIGH':'MED');
+    const tierEl=document.getElementById('gpuTier');if(tierEl)tierEl.textContent=tier;
+    const scene=new THREE.Scene();scene.background=new THREE.Color(0xf3f1ea);scene.fog=new THREE.FogExp2(0xf3f1ea,tier==='LOW'?.018:.012);
+    const camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,260);camera.position.set(0,2.5,14);
+    const renderer=new THREE.WebGLRenderer({antialias:tier!=='LOW',alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,tier==='HIGH'?1.8:1.35));renderer.setSize(innerWidth,innerHeight);renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.03;host.appendChild(renderer.domElement);
+    let composer=null;if(tier==='HIGH'&&!reduced){composer=new EffectComposer(renderer);composer.addPass(new RenderPass(scene,camera));const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),.36,.62,.72);composer.addPass(bloom)}
+    const hemi=new THREE.HemisphereLight(0xffffff,0x1a2025,2.1);scene.add(hemi);const key=new THREE.DirectionalLight(0xffffff,2.8);key.position.set(8,12,10);scene.add(key);const signalLight=new THREE.PointLight(0xff4d17,10,34,2);signalLight.position.set(0,2,-17);scene.add(signalLight);
 
-const CHAPTERS = [
-  {name:'risk', label:'UNBOUNDED', description:'Agent intent exists, but artifact quality, authority, and delivery are not yet established.', color:'#ff667e'},
-  {name:'boundary', label:'THE FENCE', description:'The request crosses from agent intent into externally governed execution.', color:'#79f7d2'},
-  {name:'quality', label:'QUALITY', description:'Deterministic admission evaluates the artifact before sensitive authorization.', color:'#63b3ff'},
-  {name:'guard', label:'GUARD', description:'Mandatory fail-closed policy decides exact action authority outside the agent.', color:'#b293ff'},
-  {name:'bus', label:'BUS', description:'A tenant-scoped handoff is committed durably before delivery can be claimed.', color:'#78f3cf'},
-  {name:'evidence', label:'EVIDENCE', description:'A hash-linked completion event produces one truthful receipt.', color:'#f0c775'},
-];
+    const mat=(color,metal=.18,rough=.64)=>new THREE.MeshStandardMaterial({color,metalness:metal,roughness:rough});
+    const signalMat=new THREE.MeshStandardMaterial({color:0xff4d17,emissive:0xff4d17,emissiveIntensity:2.4,metalness:.25,roughness:.28});
+    const darkMat=mat(0x141619,.74,.33), steelMat=mat(0x4c5358,.72,.3), whiteMat=mat(0xe8e5dc,.16,.7), greenMat=new THREE.MeshStandardMaterial({color:0x27b978,emissive:0x27b978,emissiveIntensity:1.2,metalness:.18,roughness:.4});
+    const lineSignal=new THREE.LineBasicMaterial({color:0xff4d17,transparent:true,opacity:.75}), lineDark=new THREE.LineBasicMaterial({color:0x31363a,transparent:true,opacity:.42}), lineLight=new THREE.LineBasicMaterial({color:0x747c7f,transparent:true,opacity:.28});
+    const groups={};['risk','boundary','quality','guard','bus','evidence'].forEach(n=>{groups[n]=new THREE.Group();scene.add(groups[n])});
 
-function detectTier(){
-  const mem = navigator.deviceMemory || 4;
-  const cores = navigator.hardwareConcurrency || 4;
-  const mobile = innerWidth < 760 || matchMedia('(pointer:coarse)').matches;
-  if (mobile || mem <= 4 || cores <= 4) return 'LOW';
-  if (mem >= 8 && cores >= 8 && innerWidth >= 1100) return 'HIGH';
-  return 'MEDIUM';
-}
-const tier = detectTier();
-const mobileView = innerWidth < 680;
-if (gpuTierEl) gpuTierEl.textContent = tier;
+    // 00 uncontrolled agent field
+    groups.risk.position.z=0;
+    const riskCount=tier==='HIGH'?150:tier==='MED'?95:52;const geom=new THREE.IcosahedronGeometry(.12,0);const inst=new THREE.InstancedMesh(geom,darkMat,riskCount);const dummy=new THREE.Object3D(), riskPositions=[];
+    for(let i=0;i<riskCount;i++){const a=Math.random()*Math.PI*2,r=2.3+Math.random()*8.7,y=(Math.random()-.5)*8.5,z=(Math.random()-.5)*9;riskPositions.push(new THREE.Vector3(Math.cos(a)*r,y,z));dummy.position.copy(riskPositions[i]);dummy.scale.setScalar(.55+Math.random()*1.8);dummy.updateMatrix();inst.setMatrixAt(i,dummy.matrix)}groups.risk.add(inst);
+    const linePoints=[];for(let i=0;i<Math.min(70,riskPositions.length-1);i++){linePoints.push(riskPositions[i],riskPositions[(i*7+13)%riskPositions.length])}const riskLines=new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(linePoints),lineLight);groups.risk.add(riskLines);
+    const intent=new THREE.Mesh(new THREE.OctahedronGeometry(.72,0),signalMat);intent.position.set(0,.4,-1.8);groups.risk.add(intent);
 
-function webglAvailable(){
-  try { const c=document.createElement('canvas'); return !!(window.WebGL2RenderingContext && c.getContext('webgl2')) || !!c.getContext('webgl'); }
-  catch { return false; }
-}
+    // 01 monumental boundary
+    groups.boundary.position.z=-20;const fenceFrame=new THREE.Group();groups.boundary.add(fenceFrame);const postGeo=new THREE.BoxGeometry(.38,14,.75);[-8,8].forEach(x=>{const p=new THREE.Mesh(postGeo,darkMat);p.position.x=x;fenceFrame.add(p)});const lintel=new THREE.Mesh(new THREE.BoxGeometry(16.4,.38,.75),darkMat);lintel.position.y=7;fenceFrame.add(lintel);const base=new THREE.Mesh(new THREE.BoxGeometry(16.4,.28,.75),darkMat);base.position.y=-7;fenceFrame.add(base);const membrane=new THREE.Mesh(new THREE.BoxGeometry(.055,13.5,13.5),signalMat);membrane.rotation.y=Math.PI/2;membrane.position.z=.05;groups.boundary.add(membrane);const boundaryWord=makeWordBars('AIFENCE',groups.boundary,-.6);
 
-if (!host || !shell || !stage || reduced || !webglAvailable()) {
-  document.body.classList.add(reduced ? 'reduce-3d' : 'webgl-failed');
-  chapters.forEach((el,i)=>el.classList.toggle('is-active',i===0));
-} else {
-  const COLORS={risk:0xff667e,mint:0x79f7d2,quality:0x63b3ff,guard:0xb293ff,bus:0x78f3cf,audit:0xf0c775,white:0xd7e3e7,dark:0x071017};
-  const scene=new THREE.Scene();
-  scene.background=new THREE.Color(0x020405);
-  scene.fog=new THREE.FogExp2(0x020405,tier==='LOW'?0.026:0.021);
-  const camera=new THREE.PerspectiveCamera(innerWidth<680?55:48,innerWidth/innerHeight,.1,180);
-  camera.position.set(-7,2.4,10);
-  const renderer=new THREE.WebGLRenderer({alpha:false,antialias:tier!=='LOW',powerPreference:'high-performance'});
-  const dprCap=tier==='HIGH'?1.85:tier==='MEDIUM'?1.5:1.15;
-  renderer.setPixelRatio(Math.min(devicePixelRatio,dprCap));
-  renderer.setSize(innerWidth,innerHeight);
-  renderer.outputColorSpace=THREE.SRGBColorSpace;
-  renderer.toneMapping=THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure=1.08;
-  host.appendChild(renderer.domElement);
+    // 02 Quality chamber
+    groups.quality.position.z=-40;const floor=new THREE.Mesh(new THREE.BoxGeometry(16,.18,16),whiteMat);floor.position.y=-4.7;groups.quality.add(floor);const ceil=floor.clone();ceil.position.y=4.7;groups.quality.add(ceil);for(const x of [-6.5,6.5])for(const z of [-5,0,5]){const pillar=new THREE.Mesh(new THREE.BoxGeometry(.28,9.2,.28),steelMat);pillar.position.set(x,0,z);groups.quality.add(pillar)}
+    const artifact=new THREE.Mesh(new THREE.BoxGeometry(4.6,5.6,.2),new THREE.MeshStandardMaterial({color:0xffffff,metalness:.03,roughness:.9}));artifact.position.set(0,.1,0);groups.quality.add(artifact);const scan=new THREE.Mesh(new THREE.BoxGeometry(5.7,.035,1.1),signalMat);scan.position.set(0,2.7,.2);groups.quality.add(scan);for(let i=0;i<6;i++){const bar=new THREE.Mesh(new THREE.BoxGeometry(2.5+Math.random()*1.3,.08,.05),darkMat);bar.position.set(-.25,1.6-i*.62,.14);groups.quality.add(bar)}const qualitySeal=new THREE.Mesh(new THREE.TorusGeometry(.72,.07,10,48),greenMat);qualitySeal.position.set(3.6,-2.6,.8);groups.quality.add(qualitySeal);
 
-  const composer=new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene,camera));
-  const bloom=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),tier==='HIGH'?.82:tier==='MEDIUM'?.58:.34,.78,.22);
-  composer.addPass(bloom);
+    // 03 Guard vault and exact-action corridor
+    groups.guard.position.z=-60;for(const x of [-5.4,5.4]){const wall=new THREE.Mesh(new THREE.BoxGeometry(5.1,10.6,1.2),darkMat);wall.position.set(x,0,0);groups.guard.add(wall)}const gateL=new THREE.Mesh(new THREE.BoxGeometry(4.2,8.2,.55),steelMat),gateR=gateL.clone();gateL.position.set(-2.12,0,.7);gateR.position.set(2.12,0,.7);groups.guard.add(gateL,gateR);groups.guard.userData.gateL=gateL;groups.guard.userData.gateR=gateR;
+    const capPath=new THREE.Mesh(new THREE.BoxGeometry(1.25,.08,16),signalMat);capPath.position.set(0,-3.2,-7);groups.guard.add(capPath);for(let i=0;i<8;i++){const r=new THREE.Mesh(new THREE.TorusGeometry(2.2+i*.08,.025,6,64),i===7?signalMat:steelMat);r.rotation.x=Math.PI/2;r.position.z=-i*.8+2.4;groups.guard.add(r)}const capToken=new THREE.Mesh(new THREE.DodecahedronGeometry(.48,0),signalMat);capToken.position.set(0,-3.05,-1.8);groups.guard.add(capToken);
 
-  scene.add(new THREE.HemisphereLight(0x8bb4c1,0x020405,.24));
-  const key=new THREE.PointLight(COLORS.mint,18,28,2);key.position.set(9,5,5);scene.add(key);
-  const blue=new THREE.PointLight(COLORS.quality,15,28,2);blue.position.set(25,3,4);scene.add(blue);
-  const violet=new THREE.PointLight(COLORS.guard,16,28,2);violet.position.set(38,2,4);scene.add(violet);
-  const gold=new THREE.PointLight(COLORS.audit,12,24,2);gold.position.set(61,1,3);scene.add(gold);
+    // 04 Bus lanes: three tenant corridors and moving packets
+    groups.bus.position.z=-80;const lanes=[];for(let i=-1;i<=1;i++){const y=i*2.45;const lane=new THREE.Group();for(const x of [-4.2,4.2]){const rail=new THREE.Mesh(new THREE.BoxGeometry(.08,.08,22),i===0?signalMat:steelMat);rail.position.set(x,y,-5);lane.add(rail)}const cross=new THREE.Mesh(new THREE.BoxGeometry(8.4,.035,22),new THREE.MeshStandardMaterial({color:i===0?0x191b1e:0x25292d,metalness:.7,roughness:.45,transparent:true,opacity:.55}));cross.position.set(0,y-.12,-5);lane.add(cross);groups.bus.add(lane);lanes.push(lane)}
+    const packets=[];for(let i=0;i<(tier==='LOW'?5:10);i++){const p=new THREE.Mesh(new THREE.BoxGeometry(.35,.35,.35),i%3===0?signalMat:greenMat);p.position.set((i%2?2:-2),0,-i*1.7);groups.bus.add(p);packets.push(p)}const tenantWall=new THREE.Mesh(new THREE.BoxGeometry(.05,8,22),new THREE.MeshStandardMaterial({color:0xff4d17,emissive:0xff4d17,emissiveIntensity:.9,transparent:true,opacity:.25}));tenantWall.position.set(0,0,-5);tenantWall.rotation.z=Math.PI/2;groups.bus.add(tenantWall);
 
-  const world=new THREE.Group();scene.add(world);
-  const animated=[];
-  const hotspotAnchors={};
-  const sceneGroups={};
-  let scrollProgress=0,smoothProgress=0,pointerX=0,pointerY=0,touchX=0,touchY=0,lastChapter=-1;
-  let lowPerfFrames=0, degraded=false;
-  const frameSamples=[];
-  const clock=new THREE.Clock();
+    // 05 Evidence room
+    groups.evidence.position.z=-102;const roomFloor=new THREE.Mesh(new THREE.BoxGeometry(18,.15,18),whiteMat);roomFloor.position.y=-4.4;groups.evidence.add(roomFloor);const plinth=new THREE.Mesh(new THREE.BoxGeometry(6.5,.8,3.3),whiteMat);plinth.position.y=-3.7;groups.evidence.add(plinth);const receipt=new THREE.Mesh(new THREE.BoxGeometry(7.5,4.8,.18),new THREE.MeshStandardMaterial({color:0xf8f6f0,metalness:.03,roughness:.82}));receipt.position.set(0,.15,-.2);groups.evidence.add(receipt);const seal=new THREE.Mesh(new THREE.TorusKnotGeometry(.8,.12,90,10),greenMat);seal.position.set(2.9,-1.45,.65);seal.scale.setScalar(.5);groups.evidence.add(seal);for(let i=0;i<4;i++){const line=new THREE.Mesh(new THREE.BoxGeometry(4.5-i*.25,.06,.04),darkMat);line.position.set(-.65,1.5-i*.62,.03);groups.evidence.add(line)}
+    // hash-chain objects retreat behind receipt
+    for(let i=0;i<8;i++){const node=new THREE.Mesh(new THREE.BoxGeometry(.35,.35,.35),i===7?greenMat:steelMat);node.position.set(-5.5+i*1.5,-2.55,-2.3-i*.15);groups.evidence.add(node);if(i){const pts=[new THREE.Vector3(-5.5+(i-1)*1.5,-2.55,-2.3-(i-1)*.15),new THREE.Vector3(-5.5+i*1.5,-2.55,-2.3-i*.15)];groups.evidence.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),lineDark))}}
 
-  const basic=(color,opacity=1)=>new THREE.MeshBasicMaterial({color,transparent:opacity<1,opacity,depthWrite:opacity>.65,blending:opacity<.45?THREE.AdditiveBlending:THREE.NormalBlending});
-  const physical=(color,emissive=color,intensity=.25,opacity=1)=>new THREE.MeshPhysicalMaterial({color,emissive,emissiveIntensity:intensity,roughness:.28,metalness:.58,transparent:opacity<1,opacity,depthWrite:opacity>.7,clearcoat:.4,clearcoatRoughness:.32});
-  const line=(color,opacity=.35)=>new THREE.LineBasicMaterial({color,transparent:true,opacity,blending:THREE.AdditiveBlending,depthWrite:false});
+    function makeWordBars(word,parent,y){const g=new THREE.Group(), total=word.length;for(let i=0;i<total;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(.15,1.4,.15),i===2?signalMat:darkMat);b.position.set((i-(total-1)/2)*.5,y,1);g.add(b)}parent.add(g);return g}
 
-  function node(color,scale=1){const g=new THREE.Group();const core=new THREE.Mesh(new THREE.IcosahedronGeometry(.12*scale,1),basic(color,.95));const halo=new THREE.Mesh(new THREE.SphereGeometry(.27*scale,16,16),basic(color,.045));g.add(core,halo);return g;}
-  function ring(radius,tube,color,opacity=.3){return new THREE.Mesh(new THREE.TorusGeometry(radius,tube,12,96),basic(color,opacity));}
-  function addEdges(group,mesh,color,opacity=.35){const e=new THREE.LineSegments(new THREE.EdgesGeometry(mesh.geometry),line(color,opacity));e.position.copy(mesh.position);e.rotation.copy(mesh.rotation);e.scale.copy(mesh.scale);group.add(e);return e;}
-  function gridPlane(group,color,w=7,h=7,space=.7){const v=[];for(let y=-h/2;y<=h/2;y+=space)v.push(0,y,-w/2,0,y,w/2);for(let z=-w/2;z<=w/2;z+=space)v.push(0,-h/2,z,0,h/2,z);const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));const l=new THREE.LineSegments(geo,line(color,.1));group.add(l);return l;}
-
-  // Instanced semantic field: request/evidence particles, not decorative confetti.
-  const particleCount=tier==='HIGH'?900:tier==='MEDIUM'?520:240;
-  const particleGeo=new THREE.TetrahedronGeometry(.027,0);
-  const particleMat=basic(COLORS.white,.36);
-  const particleField=new THREE.InstancedMesh(particleGeo,particleMat,particleCount);
-  particleField.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
-  const dummy=new THREE.Object3D();
-  const particleSeeds=Array.from({length:particleCount},(_,i)=>({x:THREE.MathUtils.randFloat(-10,70),y:THREE.MathUtils.randFloat(-7,7),z:THREE.MathUtils.randFloat(-8,8),s:.55+Math.random()*1.4,p:Math.random()*6.28}));
-  particleSeeds.forEach((s,i)=>{dummy.position.set(s.x,s.y,s.z);dummy.scale.setScalar(s.s);dummy.updateMatrix();particleField.setMatrixAt(i,dummy.matrix)});world.add(particleField);
-
-  // Far field star points make spatial motion legible.
-  const starCount=tier==='HIGH'?1600:tier==='MEDIUM'?950:450;
-  const starPos=[];for(let i=0;i<starCount;i++)starPos.push(THREE.MathUtils.randFloat(-12,80),THREE.MathUtils.randFloat(-13,13),THREE.MathUtils.randFloat(-18,10));
-  const starGeo=new THREE.BufferGeometry();starGeo.setAttribute('position',new THREE.Float32BufferAttribute(starPos,3));
-  const stars=new THREE.Points(starGeo,new THREE.PointsMaterial({size:tier==='LOW'?.025:.035,color:0x6d7e88,transparent:true,opacity:.38,depthWrite:false,blending:THREE.AdditiveBlending}));world.add(stars);
-
-  // 00 Risk: dense, unstable agent core + risk fragments.
-  const risk=new THREE.Group();risk.position.set(0,0,0);world.add(risk);sceneGroups.risk=risk;
-  const agentCore=new THREE.Mesh(new THREE.IcosahedronGeometry(1.15,5),physical(0x14242b,COLORS.mint,.4));risk.add(agentCore);hotspotAnchors['risk-core']=agentCore;
-  const agentWire=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(1.75,2)),line(COLORS.mint,.18));risk.add(agentWire);
-  const r1=ring(2.4,.008,COLORS.quality,.25);r1.rotation.x=1.1;const r2=ring(2.9,.008,COLORS.mint,.14);r2.rotation.set(.42,.7,.5);risk.add(r1,r2);
-  const riskShards=[];for(let i=0;i<22;i++){const s=new THREE.Mesh(new THREE.TetrahedronGeometry(.12+(i%4)*.035,0),physical(COLORS.risk,COLORS.risk,1.1,.9));const a=i/22*Math.PI*2,rr=2.1+(i%5)*.24;s.position.set(Math.cos(a)*rr,Math.sin(a*1.8)*1.7,Math.sin(a)*rr*.56);s.rotation.set(a,a*.6,a*1.4);risk.add(s);riskShards.push(s)}
-  animated.push(t=>{agentCore.rotation.y=t*.18;agentCore.rotation.x=Math.sin(t*.42)*.08;agentWire.rotation.y=-t*.08;r1.rotation.z=t*.08;r2.rotation.y=t*.05;riskShards.forEach((s,i)=>{s.rotation.x+=.004;s.rotation.y+=.003;s.position.y+=Math.sin(t*.9+i)*.0012})});
-
-  // 01 Boundary: shader-driven energy membrane and tunnel rings.
-  const boundary=new THREE.Group();boundary.position.set(11,0,0);world.add(boundary);sceneGroups.boundary=boundary;
-  const gateUniforms={uTime:{value:0},uProgress:{value:0},uColor:{value:new THREE.Color(COLORS.mint)}};
-  const gateMat=new THREE.ShaderMaterial({transparent:true,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending,uniforms:gateUniforms,vertexShader:`uniform float uTime;varying vec2 vUv;varying vec3 vPos;void main(){vUv=uv;vPos=position;vec3 p=position;p.x+=sin((uv.y+uTime*.13)*26.)*.018;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);}`,fragmentShader:`uniform float uTime;uniform float uProgress;uniform vec3 uColor;varying vec2 vUv;varying vec3 vPos;void main(){float scan=.5+.5*sin(vUv.y*58.-uTime*5.);float edge=pow(1.-abs(vUv.x-.5)*2.,4.);float bands=smoothstep(.72,1.,scan)*.25;float alpha=.045+edge*.22+bands*.13+uProgress*.08;gl_FragColor=vec4(uColor,alpha);}`});
-  const gate=new THREE.Mesh(new THREE.PlaneGeometry(7.4,7.4,24,24),gateMat);gate.rotation.y=Math.PI/2;boundary.add(gate);
-  for(let i=0;i<16;i++){const rr=ring(3.35-i*.025,.014,i%4===0?COLORS.mint:COLORS.quality,.1+(i%4===0?.15:0));rr.rotation.y=Math.PI/2;rr.position.x=-4.3+i*.55;boundary.add(rr)}
-  const fenceBars=new THREE.Group();for(let i=-4;i<=4;i++){const bar=new THREE.Mesh(new THREE.BoxGeometry(.02,6.9,.018),basic(COLORS.mint,.12));bar.position.z=i*.72;fenceBars.add(bar)}boundary.add(fenceBars);
-
-  // 02 Quality: recognizable prism, scan planes, findings orbit.
-  const quality=new THREE.Group();quality.position.set(24,0,0);world.add(quality);sceneGroups.quality=quality;gridPlane(quality,COLORS.quality,7.5,7,0.65);
-  const artifact=new THREE.Mesh(new THREE.OctahedronGeometry(1.0,2),physical(0x163d5d,COLORS.quality,.85));artifact.rotation.z=Math.PI/4;quality.add(artifact);hotspotAnchors['quality-artifact']=artifact;
-  const artifactWire=new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.OctahedronGeometry(1.2,1)),line(COLORS.quality,.55));quality.add(artifactWire);
-  const scanPlanes=[];for(let i=0;i<4;i++){const pl=new THREE.Mesh(new THREE.PlaneGeometry(5.8,.035),basic(i%2?COLORS.quality:COLORS.mint,.45));pl.rotation.y=Math.PI/2;pl.position.x=(i-1.5)*.18;quality.add(pl);scanPlanes.push(pl)}
-  const findings=[];for(let i=0;i<7;i++){const n=node(i===6?COLORS.mint:COLORS.quality,.68);const a=i/7*Math.PI*2;n.position.set(.35,Math.cos(a)*2.5,Math.sin(a)*2.5);quality.add(n);findings.push(n)}
-  animated.push(t=>{artifact.rotation.y=t*.25;artifactWire.rotation.y=-t*.16;scanPlanes.forEach((p,i)=>p.position.y=Math.sin(t*1.25+i*1.5)*2.6);findings.forEach((n,i)=>n.scale.setScalar(.9+Math.sin(t*1.7+i)*.07))});
-
-  // 03 Guard: shield layers + exact-action capability token.
-  const guard=new THREE.Group();guard.position.set(37,0,0);world.add(guard);sceneGroups.guard=guard;
-  const shield=new THREE.Mesh(new THREE.CylinderGeometry(2.1,2.35,.08,7,1,false),basic(COLORS.guard,.18));shield.rotation.z=Math.PI/2;shield.rotation.y=Math.PI/2;guard.add(shield);
-  const shieldEdge=new THREE.LineSegments(new THREE.EdgesGeometry(shield.geometry),line(COLORS.guard,.6));shieldEdge.rotation.copy(shield.rotation);guard.add(shieldEdge);
-  const guardR1=ring(2.6,.018,COLORS.guard,.34);guardR1.rotation.y=Math.PI/2;guard.add(guardR1);const guardR2=ring(3.15,.009,COLORS.mint,.16);guardR2.rotation.y=Math.PI/2;guard.add(guardR2);
-  const capability=new THREE.Mesh(new THREE.DodecahedronGeometry(.62,0),physical(0x3a2e67,COLORS.guard,.9));capability.position.set(.6,0,0);guard.add(capability);hotspotAnchors['guard-capability']=capability;
-  const policyNodes=[];for(let i=0;i<8;i++){const n=node(i<6?COLORS.guard:COLORS.mint,.55);const a=i/8*Math.PI*2;n.position.set(-.2,Math.cos(a)*2.05,Math.sin(a)*2.05);guard.add(n);policyNodes.push(n)}
-  animated.push(t=>{capability.rotation.x=t*.31;capability.rotation.y=t*.23;guardR1.rotation.z=t*.08;guardR2.rotation.x=-t*.04;policyNodes.forEach((n,i)=>n.rotation.y=t*.2+i)});
-
-  // 04 Bus: tenant lanes and moving durable packets.
-  const bus=new THREE.Group();bus.position.set(50,0,0);world.add(bus);sceneGroups.bus=bus;
-  const laneColors=[COLORS.bus,0x394650,0x394650];const laneY=[0,2.8,-2.8];
-  laneY.forEach((y,idx)=>{const lane=ring(3.1,.008,laneColors[idx],idx===0?.22:.08);lane.rotation.y=Math.PI/2;lane.position.y=y;lane.scale.z=.8;bus.add(lane)});
-  const busPositions=[new THREE.Vector3(0,0,0),new THREE.Vector3(0,2,2.5),new THREE.Vector3(0,-1.9,2.8),new THREE.Vector3(0,1.65,-2.8),new THREE.Vector3(0,-2.2,-2.4),new THREE.Vector3(0,.15,3.8)];
-  busPositions.forEach((p,i)=>{const n=node(i===0?COLORS.bus:COLORS.quality,i===0?1.3:.85);n.position.copy(p);bus.add(n)});
-  const curves=[],packets=[];for(let i=1;i<busPositions.length;i++){const a=busPositions[0].clone(),b=busPositions[i].clone(),mid=a.clone().lerp(b,.5);mid.x+=.9+i*.08;const c=new THREE.QuadraticBezierCurve3(a,mid,b);curves.push(c);bus.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(c.getPoints(36)),line(i%2?COLORS.bus:COLORS.quality,.3)));const p=new THREE.Mesh(new THREE.SphereGeometry(.08,12,12),basic(COLORS.bus,.98));bus.add(p);packets.push(p)}hotspotAnchors['bus-packet']=packets[0];
-  const tenantBoundary=new THREE.Mesh(new THREE.PlaneGeometry(6.6,1.4),basic(COLORS.risk,.035));tenantBoundary.rotation.y=Math.PI/2;tenantBoundary.position.y=2.8;bus.add(tenantBoundary);
-  animated.push(t=>{packets.forEach((p,i)=>p.position.copy(curves[i].getPoint((t*(.1+i*.008)+i*.17)%1)));tenantBoundary.material.opacity=.025+Math.sin(t*1.8)*.012});
-
-  // 05 Evidence: signed receipt slab, hash chain, compatibility halo.
-  const evidence=new THREE.Group();evidence.position.set(64,0,0);world.add(evidence);sceneGroups.evidence=evidence;
-  const plate=new THREE.Mesh(new THREE.BoxGeometry(.14,4.4,6.4),physical(0x0b1c17,COLORS.mint,.34,.9));evidence.add(plate);addEdges(evidence,plate,COLORS.mint,.55);
-  for(let y=-1.5;y<=1.5;y+=.75){const l=new THREE.Mesh(new THREE.BoxGeometry(.03,.02,4.8-Math.abs(y)*.4),basic(y>1?COLORS.audit:COLORS.mint,y>1?.62:.24));l.position.set(-.1,y,.25);evidence.add(l)}
-  const chain=[];for(let i=0;i<9;i++){const n=node(i===8?COLORS.audit:COLORS.mint,.52);n.position.set(.55+i*.36,-2.6+i*.52,-3.9+i*.13);evidence.add(n);chain.push(n);if(i){evidence.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([chain[i-1].position,n.position]),line(COLORS.mint,.3)))}}
-  const seal=ring(.72,.055,COLORS.audit,.76);seal.rotation.y=Math.PI/2;seal.position.set(-.22,-1.2,-1.9);evidence.add(seal);hotspotAnchors['audit-seal']=seal;
-  const compat=ring(3.65,.009,COLORS.audit,.12);compat.rotation.y=Math.PI/2;evidence.add(compat);
-  animated.push(t=>{plate.rotation.x=Math.sin(t*.28)*.018;seal.rotation.x=t*.35;compat.rotation.z=-t*.025;chain.forEach((n,i)=>n.scale.setScalar(.94+Math.sin(t*1.8+i)*.045))});
-
-  // One continuous path ribbon visually ties all stages together.
-  const pathPts=[];for(let x=-8;x<72;x+=.55)pathPts.push(new THREE.Vector3(x,-3.75+Math.sin(x*.18)*.16,-.4));
-  const ribbonCurve=new THREE.CatmullRomCurve3(pathPts);const ribbon=new THREE.Mesh(new THREE.TubeGeometry(ribbonCurve,210,.011,5,false),basic(COLORS.mint,.17));world.add(ribbon);
-
-  // Camera choreography. Curve is intentionally asymmetric with stage-specific framing.
-  const camPoints=mobileView ? [
-    new THREE.Vector3(-6,3.8,12.8),new THREE.Vector3(3.5,2.8,10.5),new THREE.Vector3(10.6,1.7,7.5),new THREE.Vector3(21.2,3.1,10.8),new THREE.Vector3(34.2,2.9,10.6),new THREE.Vector3(47.1,2.7,10.5),new THREE.Vector3(60.2,3.1,11.6),new THREE.Vector3(65.5,3.7,13.2)
-  ] : [
-    new THREE.Vector3(-7,2.4,10),new THREE.Vector3(3,1.2,7.3),new THREE.Vector3(10.4,.3,4.3),new THREE.Vector3(20.5,1.1,7.4),new THREE.Vector3(33.7,.9,7.1),new THREE.Vector3(46.8,.7,7.2),new THREE.Vector3(60,1.1,8.4),new THREE.Vector3(66,1.5,9.8)
-  ];
-  const camCurve=new THREE.CatmullRomCurve3(camPoints,false,'catmullrom',.42);
-  const targetCurve=new THREE.CatmullRomCurve3([
-    new THREE.Vector3(0,0,0),new THREE.Vector3(11,0,0),new THREE.Vector3(24,0,0),new THREE.Vector3(37,0,0),new THREE.Vector3(50,0,0),new THREE.Vector3(64,0,0)
-  ],false,'catmullrom',.32);
-
-  function stageWeight(index,p){const centers=[.05,.22,.4,.58,.76,.95],width=.18;return Math.max(0,1-Math.abs(p-centers[index])/width)}
-  function updateMorphs(p){
-    // Instead of hard cuts, adjacent environments breathe in/out and geometry migrates toward the path.
-    const groups=[risk,boundary,quality,guard,bus,evidence];
-    groups.forEach((g,i)=>{const w=Math.min(1,.3+stageWeight(i,p)*.7);g.scale.setScalar(.84+w*.16);g.rotation.x=Math.sin((p-i*.16)*Math.PI)*.018*(1-w);g.position.y=(1-w)*.22*Math.sin(p*12+i)});
-    gateUniforms.uProgress.value=stageWeight(1,p);
-    const riskFade=Math.max(.25,1-p*1.3);riskShards.forEach(s=>s.material.opacity=.18+riskFade*.72);
-    tenantBoundary.material.opacity=.02+stageWeight(4,p)*.065;
-  }
-
-  function activeIndexFromProgress(p){const bounds=[.14,.30,.48,.66,.84];let i=0;while(i<bounds.length&&p>bounds[i])i++;return i}
-  function setChapter(i){if(i===lastChapter)return;lastChapter=i;const c=CHAPTERS[i];chapters.forEach(el=>el.classList.toggle('is-active',el.dataset.tourChapter===c.name));if(hudState)hudState.textContent=c.label;if(hudStep)hudStep.textContent=String(i).padStart(2,'0')+' / 05';if(mapState)mapState.textContent=c.label;mapDots.forEach((d,j)=>d.classList.toggle('active',j<=i));if(depthLabel)depthLabel.textContent=c.label;if(colorwash)colorwash.style.background=`radial-gradient(circle at 50% 48%,${c.color}10,transparent 34%)`;hotspots.forEach(h=>h.classList.remove('visible'));if(experience.inspect){const mapping=[['risk-core'],[],['quality-artifact'],['guard-capability'],['bus-packet'],['audit-seal']][i];mapping.forEach(k=>document.querySelector(`[data-hotspot="${k}"]`)?.classList.add('visible'))}dispatchEvent(new CustomEvent('aifence:chapter',{detail:c}));}
-
-  function projectHotspots(){
-    const visible = experience.inspect;
-    hotspots.forEach(el=>{const anchor=hotspotAnchors[el.dataset.hotspot];if(!anchor||!visible){el.classList.remove('visible');return}let parent=anchor;const p=new THREE.Vector3();anchor.getWorldPosition(p);p.project(camera);if(p.z>1){el.classList.remove('visible');return}const x=(p.x*.5+.5)*innerWidth,y=(-p.y*.5+.5)*innerHeight;el.style.left=x+'px';el.style.top=y+'px';if(Math.abs(p.x)<1.05&&Math.abs(p.y)<1.05)el.classList.add('visible');else el.classList.remove('visible')});
-  }
-
-  function updateScroll(){const r=shell.getBoundingClientRect();const max=shell.offsetHeight-innerHeight;scrollProgress=THREE.MathUtils.clamp(-r.top/max,0,1);if(hudProgress)hudProgress.style.width=(scrollProgress*100).toFixed(1)+'%'}
-  addEventListener('scroll',updateScroll,{passive:true});updateScroll();
-  addEventListener('pointermove',e=>{pointerX=e.clientX/innerWidth-.5;pointerY=e.clientY/innerHeight-.5},{passive:true});
-  addEventListener('touchmove',e=>{if(!e.touches[0])return;touchX=e.touches[0].clientX/innerWidth-.5;touchY=e.touches[0].clientY/innerHeight-.5},{passive:true});
-
-  function render(){
-    const dt=Math.min(.05,clock.getDelta()),t=clock.elapsedTime;smoothProgress=THREE.MathUtils.damp(smoothProgress,scrollProgress,5.2,dt);
-    // Ease progress near scene centers to make reveals feel authored, not linearly scrubbed.
-    const eased=smoothProgress<.5?2*smoothProgress*smoothProgress:1-Math.pow(-2*smoothProgress+2,2)/2;
-    const cp=camCurve.getPoint(eased),tp=targetCurve.getPoint(Math.min(.999,THREE.MathUtils.smoothstep(smoothProgress,0,1)));
-    const px=(pointerX+touchX*.45),py=(pointerY+touchY*.45);
-    camera.position.lerp(new THREE.Vector3(cp.x,cp.y-py*.36,cp.z+px*.4),.085);
-    camera.lookAt(tp.x,tp.y+py*.2,tp.z);
-    camera.rotation.z += (Math.sin(smoothProgress*Math.PI*5)*.018 + px*.008 - camera.rotation.z)*.03;
-    stars.position.x=-smoothProgress*2.2;stars.rotation.x=t*.003;
-    animated.forEach(fn=>fn(t,smoothProgress));gateUniforms.uTime.value=t;updateMorphs(smoothProgress);
-    // semantic field flows along X as the governed request progresses.
-    if(!degraded){particleSeeds.forEach((s,i)=>{const x=s.x+Math.sin(t*.08+s.p)*.05;dummy.position.set(x,s.y+Math.sin(t*.3+s.p)*.025,s.z);dummy.rotation.set(t*.05+s.p,t*.06,0);dummy.scale.setScalar(s.s*(.7+.3*Math.sin(t*.4+s.p)));dummy.updateMatrix();particleField.setMatrixAt(i,dummy.matrix)});particleField.instanceMatrix.needsUpdate=true}
-    setChapter(activeIndexFromProgress(smoothProgress));projectHotspots();
-    composer.render();
-    // Frame-time adaptation: degrade postprocessing and semantic particle updates if sustained <~42fps.
-    frameSamples.push(dt);if(frameSamples.length>120)frameSamples.shift();if(frameSamples.length===120){const avg=frameSamples.reduce((a,b)=>a+b,0)/frameSamples.length;if(avg>.024)lowPerfFrames++;else lowPerfFrames=Math.max(0,lowPerfFrames-1);if(lowPerfFrames>40&&!degraded){degraded=true;bloom.strength=Math.min(bloom.strength,.25);particleField.count=Math.min(particleField.count,160);renderer.setPixelRatio(Math.min(renderer.getPixelRatio(),1.0));renderer.setSize(innerWidth,innerHeight,false);if(gpuTierEl)gpuTierEl.textContent=tier+'→ECO'}}
-    requestAnimationFrame(render);
-  }
-  render();
-  addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setPixelRatio(Math.min(devicePixelRatio,dprCap));renderer.setSize(innerWidth,innerHeight);composer.setSize(innerWidth,innerHeight);bloom.setSize(innerWidth,innerHeight)},{passive:true});
+    const chapters=['risk','boundary','quality','guard','bus','evidence'];const desc={risk:'Uncontrolled agent intent.',boundary:'The governed boundary.',quality:'Quality admission inspection.',guard:'Fail-closed Guard authorization.',bus:'Tenant-scoped durable handoff.',evidence:'Signed completion evidence.'};let current='risk',progress=0,targetProgress=0;
+    const camPos=[new THREE.Vector3(0,2.3,14),new THREE.Vector3(-1.5,1.2,-8),new THREE.Vector3(6.8,1.4,-29),new THREE.Vector3(-6.4,.8,-49),new THREE.Vector3(7.2,1,-69),new THREE.Vector3(0,.9,-92)];
+    const camLook=[new THREE.Vector3(0,0,-1.5),new THREE.Vector3(0,0,-20),new THREE.Vector3(0,0,-40),new THREE.Vector3(0,0,-60),new THREE.Vector3(0,0,-82),new THREE.Vector3(0,0,-102)];
+    const mouse=new THREE.Vector2();addEventListener('pointermove',e=>{mouse.x=(e.clientX/innerWidth-.5)*2;mouse.y=(e.clientY/innerHeight-.5)*2},{passive:true});
+    function scrollProgress(){const max=shell.offsetHeight-innerHeight;targetProgress=THREE.MathUtils.clamp((scrollY-shell.offsetTop)/Math.max(1,max),0,1)}addEventListener('scroll',scrollProgress,{passive:true});scrollProgress();
+    function chapterFrom(p){return chapters[Math.min(5,Math.floor(p*6))]}
+    function updateChapter(name){if(name===current)return;current=name;document.querySelectorAll('[data-tour-chapter]').forEach(el=>el.classList.toggle('is-active',el.dataset.tourChapter===name));const i=chapters.indexOf(name);const stateEl=document.getElementById('hudState'),stepEl=document.getElementById('hudStep');if(stateEl)stateEl.textContent={risk:'UNCONTROLLED',boundary:'BOUNDARY',quality:'QUALITY',guard:'GUARD',bus:'BUS',evidence:'EVIDENCE'}[name];if(stepEl)stepEl.textContent=String(i).padStart(2,'0')+' / 05';const dark=name==='guard'||name==='bus';stage.dataset.tone=dark?'dark':'light';document.getElementById('siteHeader')?.classList.toggle('on-dark',dark);window.dispatchEvent(new CustomEvent('aifence:chapter',{detail:{name,description:desc[name]}}))}
+    // hotspot anchor mapping
+    const anchors={'risk-core':intent,'quality-artifact':artifact,'guard-capability':capToken,'bus-packet':packets[0],'audit-seal':seal};const hotspotEls={};document.querySelectorAll('.hotspot').forEach(h=>hotspotEls[h.dataset.hotspot]=h);
+    function projectHotspots(){for(const [name,obj] of Object.entries(anchors)){const el=hotspotEls[name];if(!el)continue;const p=new THREE.Vector3();obj.getWorldPosition(p);p.project(camera);const visible=Math.abs(p.z)<1&&p.x>-1&&p.x<1&&p.y>-1&&p.y<1;el.style.display=visible?'block':'none';if(visible){el.style.left=(p.x*.5+.5)*innerWidth+'px';el.style.top=(-p.y*.5+.5)*innerHeight+'px'}}}
+    let last=performance.now(),fpsWindow=[];
+    function animate(now){requestAnimationFrame(animate);const dt=Math.min(.05,(now-last)/1000);last=now;progress+= (targetProgress-progress)*Math.min(1,dt*5.5);const scaled=progress*5,idx=Math.min(4,Math.floor(scaled)),t=scaled-idx,s=t*t*(3-2*t);camera.position.lerpVectors(camPos[idx],camPos[idx+1],s);const look=new THREE.Vector3().lerpVectors(camLook[idx],camLook[idx+1],s);if(!reduced){camera.position.x+=mouse.x*(coarse?.04:.18);camera.position.y+=-mouse.y*(coarse?.03:.12)}camera.lookAt(look);updateChapter(chapterFrom(progress));const prog=document.getElementById('hudProgress');if(prog)prog.style.width=(progress*100).toFixed(2)+'%';
+      // environment transforms
+      const time=now*.001;intent.rotation.x=time*.65;intent.rotation.y=time*.8;riskLines.rotation.y=time*.025;membrane.material.emissiveIntensity=2.0+Math.sin(time*3)*.6;scan.position.y=2.7-((time*.8)%1)*5.4;qualitySeal.rotation.z=time*.8;capToken.rotation.x=time;capToken.rotation.y=time*.7;const guardPhase=THREE.MathUtils.smoothstep(progress,.52,.69);gateL.position.x=-2.12-guardPhase*1.45;gateR.position.x=2.12+guardPhase*1.45;packets.forEach((p,i)=>{p.position.z=-((time*2.1+i*2.2)%20)+4;p.position.y=Math.sin(time*1.3+i)*.08});seal.rotation.x=time*.4;seal.rotation.y=time*.55;projectHotspots();
+      // background/fog crossfade by current spatial zone
+      const dark=(current==='guard'||current==='bus');const bg=new THREE.Color(dark?0x0b0c0e:0xf3f1ea);scene.background.lerp(bg,.055);scene.fog.color.lerp(bg,.055);hemi.intensity=dark?1.15:2.1;key.intensity=dark?1.7:2.8;
+      if(composer)composer.render();else renderer.render(scene,camera);
+      // adaptive degradation
+      fpsWindow.push(1/Math.max(dt,.001));if(fpsWindow.length>120){const avg=fpsWindow.reduce((a,b)=>a+b,0)/fpsWindow.length;fpsWindow=[];if(avg<38&&tier==='HIGH'){tier='MED';composer=null;renderer.setPixelRatio(Math.min(devicePixelRatio,1.35));if(tierEl)tierEl.textContent='MED AUTO'}}
+    }
+    requestAnimationFrame(animate);
+    addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);composer?.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,tier==='HIGH'?1.8:1.35))});
+  }catch(err){console.warn('AIFENCE WebGL fallback:',err);document.body.classList.add('webgl-failed');const tierEl=document.getElementById('gpuTier');if(tierEl)tierEl.textContent='FALLBACK'}
 }
